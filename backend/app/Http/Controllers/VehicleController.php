@@ -42,4 +42,12 @@ class VehicleController extends Controller
             'vehicle' => $vehicle
         ], 201);
     }
+
+    public function getVehicle(Request $request)
+    {
+        // Find the vehicle that belongs to the logged-in user
+        $vehicle = Vehicle::where('user_id', $request->user()->id)->first();
+        
+        return response()->json($vehicle, 200);
+    }
 }

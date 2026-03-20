@@ -30,5 +30,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/users', [AdminController::class, 'getAllUsers']);
     Route::get('/admin/stations', [AdminController::class, 'getAllStations']);
     Route::get('/admin/transactions', [AdminController::class, 'getAllTransactions']);
+
+    Route::get('/vehicle', [VehicleController::class, 'getVehicle']);
+
+    Route::get('/station', [StationController::class, 'getStation']);
     
 });

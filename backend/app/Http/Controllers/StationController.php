@@ -73,4 +73,12 @@ class StationController extends Controller
             'remaining_quota' => $quota->remaining_quota,
         ], 200);
     }
+
+    public function getStation(Request $request)
+    {
+        // Find the station profile that belongs to the logged-in user
+        $station = Station::where('user_id', $request->user()->id)->first();
+        
+        return response()->json($station, 200);
+    }
 }

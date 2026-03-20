@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Auth from './components/Auth';
+import UserDashboard from './components/UserDashboard';
 
-
-const Login = () => <div className="p-10 text-center font-display text-3xl">Login Page Coming Soon</div>;
-const UserDashboard = () => <div className="p-10 font-sans">User Dashboard Coming Soon</div>;
 const StationDashboard = () => <div className="p-10 font-sans">Station Dashboard Coming Soon</div>;
 const AdminDashboard = () => <div className="p-10 font-sans">Admin Dashboard Coming Soon</div>;
 
@@ -19,7 +18,7 @@ function App() {
         {/* Page Routes */}
         <main className="max-w-4xl mx-auto mt-8 bg-white p-6 rounded-lg shadow">
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<Auth />} />
             <Route path="/user" element={<UserDashboard />} />
             <Route path="/station" element={<StationDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
