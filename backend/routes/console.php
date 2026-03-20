@@ -1,8 +1,15 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+use App\Models\FuelQuota;
+use Illuminate\Support\Facades\DB;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// This tells Laravel to run this function automatically every week
+Schedule::call(function () {
+    
+    // Update the remaining_quota to match the weekly_quota for EVERY user
+    FuelQuota::query()->update([
+        'remaining_quota' => DB::raw('weekly_quota')
+    ]);
+
+})->weekly();

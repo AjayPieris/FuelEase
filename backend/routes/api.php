@@ -2,18 +2,33 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// --- THESE ARE THE IMPORTANT IMPORT LINES ---
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\FuelController; 
+use App\Http\Controllers\StationController;
+use App\Http\Controllers\AdminController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
+// --- PUBLIC ROUTES ---
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->group(function () { 
-    Route::post('/vehicles', [VehicleController::class, 'registerVehicle']);
 
+// --- PROTECTED ROUTES (Requires VIP Token) ---
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Vehicle Route
+    Route::post('/vehicles', [VehicleController::class, 'registerVehicle']);
+    
+    // Fuel Quota Routes
     Route::get('/quota', [FuelController::class, 'getQuota']);
     Route::get('/history', [FuelController::class, 'getHistory']);
+
+    Route::post('/stations', [StationController::class, 'setupStation']);
+    Route::post('/stations/scan', [StationController::class, 'deductFuel']);
+
+    Route::get('/admin/users', [AdminController::class, 'getAllUsers']);
+    Route::get('/admin/stations', [AdminController::class, 'getAllStations']);
+    Route::get('/admin/transactions', [AdminController::class, 'getAllTransactions']);
+    
 });
