@@ -3,25 +3,21 @@ import Auth from './components/Auth';
 import UserDashboard from './components/UserDashboard';
 import StationDashboard from './components/StationDashboard';
 import AdminDashboard from './components/AdminDashboard';
-import Navbar from './components/Navbar'; // <-- 1. Import the new Navbar!
+import Navbar from './components/Navbar';
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen font-sans text-gray-800 bg-gray-100">
-        
-        {/* Simple Navigation Bar */}
+      <div className="min-h-screen text-white relative">
         <Navbar />
-        {/* Page Routes */}
-        <main className="max-w-4xl mx-auto mt-8 bg-white p-6 rounded-lg shadow">
+        <main className="pt-28 pb-10 px-4 max-w-5xl mx-auto">
           <Routes>
-            <Route path="/" element={<Auth />} />
-            <Route path="/user" element={<UserDashboard />} />
+            <Route path="/"       element={<Auth />} />
+            <Route path="/user"   element={<UserDashboard />} />
             <Route path="/station" element={<StationDashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin"  element={<AdminDashboard />} />
           </Routes>
         </main>
-        
       </div>
     </BrowserRouter>
   );

@@ -11,28 +11,60 @@ class AuthController extends Controller
     // --- REGISTER NEW USER ---
     public function register(Request $request)
     {
-        // 1. Check if the user gave us the right information
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
+        $rules = [
+            'name'     => 'required|string',
+            'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:user,station,admin' // Must be one of these three
-        ]);
+            'role'     => 'required|in:user,station,admin',
+            'profile_picture_url' => 'nullable|string|url',
+        ];
 
-        // 2. Save the new user into the database
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password), // Encrypt the password!
-            'role' => $request->role,
-        ]);
+        // User (vehicle owner) must provide a unique NIC number and NIC photo
+        if ($request->role === 'user') {
+            $rules['nic_number']    = 'required|string|unique:users,nic_number';
+            $rules['nic_image_url'] = 'required|string|url';
+        }
 
-        // 3. Create their VIP Token
+        // Station must provide a document URL and a district
+        if ($request->role === 'station') {
+            $rules['document_url'] = 'required|string';
+            $rules['district']     = 'required|string';
+        }
+
+        $request->validate($rules);
+
+        $userData = [
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => $request->role,
+            'profile_picture_url' => $request->profile_picture_url,
+        ];
+
+        if ($request->role === 'user') {
+            $userData['nic_number']    = strtoupper($request->nic_number);
+            $userData['nic_image_url'] = $request->nic_image_url;
+        }
+
+        $user = User::create($userData);
+
+        // If a station, create the station record immediately with pending status
+        if ($request->role === 'station') {
+            \App\Models\Station::create([
+                'user_id'         => $user->id,
+                'name'            => $request->name,
+                'location'        => $request->location ?? '',
+                'district'        => $request->district,
+                'document_url'    => $request->document_url,
+                'approval_status' => 'pending',
+                'is_available'    => false,
+            ]);
+        }
+
         $token = $user->createToken('fuelease_token')->plainTextToken;
 
-        // 4. Send the user data and token back to the frontend
         return response()->json([
-            'user' => $user,
+            'user'  => $user,
             'token' => $token
         ], 201);
     }
@@ -40,27 +72,49 @@ class AuthController extends Controller
     // --- LOGIN EXISTING USER ---
     public function login(Request $request)
     {
-        // 1. Check if they provided email and password
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required|string'
         ]);
 
-        // 2. Find the user in the database
         $user = User::where('email', $request->email)->first();
 
-        // 3. If user doesn't exist OR password is wrong, reject them
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Incorrect email or password'], 401);
         }
 
-        // 4. If correct, create a new VIP Token
+        // Check if this account has been blocked by an admin
+        if ($user->is_blocked) {
+            return response()->json(['message' => 'Your account has been blocked. Please contact support.'], 403);
+        }
+
         $token = $user->createToken('fuelease_token')->plainTextToken;
 
-        // 5. Send data back to frontend
         return response()->json([
-            'user' => $user,
+            'user'  => $user,
             'token' => $token
         ]);
+    }
+
+    // --- UPDATE ACCOUNT (name / password) ---
+    public function updateAccount(Request $request)
+    {
+        $request->validate([
+            'name'     => 'sometimes|string',
+            'password' => 'sometimes|string|min:6',
+        ]);
+
+        $user = $request->user();
+
+        if ($request->filled('name')) {
+            $user->name = $request->name;
+        }
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return response()->json(['message' => 'Account updated!', 'user' => $user]);
     }
 }

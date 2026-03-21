@@ -1,137 +1,150 @@
 import { useState, useEffect } from 'react';
-import { QRCodeSVG } from 'qrcode.react'; // This turns our text into a real QR image!
+import { QRCodeSVG } from 'qrcode.react';
 import api from '../api/axios';
 
 export default function UserDashboard() {
-  const [vehicle, setVehicle] = useState(null);
-  const [quota, setQuota] = useState(null);
-  const [history, setHistory] = useState([]);
-  
-  // Form states for registering a new vehicle
+  const [vehicle, setVehicle]           = useState(null);
+  const [quota, setQuota]               = useState(null);
+  const [history, setHistory]           = useState([]);
   const [vehicleNumber, setVehicleNumber] = useState('');
-  const [fuelType, setFuelType] = useState('Petrol');
-  const [loading, setLoading] = useState(true);
+  const [fuelType, setFuelType]         = useState('Petrol');
+  const [loading, setLoading]           = useState(true);
 
-  // When the page loads, fetch the user's data
-  useEffect(() => {
-    fetchUserData();
-  }, []);
+  useEffect(() => { fetchUserData(); }, []);
 
   const fetchUserData = async () => {
     try {
-      // 1. Get their vehicle
       const vehicleRes = await api.get('/vehicle');
       if (vehicleRes.data) {
         setVehicle(vehicleRes.data);
-        
-        // 2. If they have a vehicle, get their quota and history
-        const quotaRes = await api.get('/quota');
+        const [quotaRes, historyRes] = await Promise.all([api.get('/quota'), api.get('/history')]);
         setQuota(quotaRes.data);
-        
-        const historyRes = await api.get('/history');
         setHistory(historyRes.data);
       }
     } catch (error) {
-      console.error("Error fetching data", error);
-    } finally {
-      setLoading(false);
-    }
+      console.error('Error fetching data', error);
+    } finally { setLoading(false); }
   };
 
   const handleRegisterVehicle = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/vehicles', { 
-        vehicle_number: vehicleNumber, 
-        fuel_type: fuelType 
-      });
-      // Refresh the page data after successful registration
+      await api.post('/vehicles', { vehicle_number: vehicleNumber, fuel_type: fuelType });
       fetchUserData();
     } catch (error) {
-      alert(error.response?.data?.message || "Error registering vehicle");
+      alert(error.response?.data?.message || 'Error registering vehicle');
     }
   };
 
-  if (loading) return <div className="text-center p-10 font-sans">Loading your dashboard...</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="glass rounded-2xl px-10 py-8 text-white/60 text-lg">Loading your dashboard…</div>
+    </div>
+  );
 
-  // --- IF THEY DON'T HAVE A VEHICLE YET ---
+  /* ── Register Vehicle ── */
   if (!vehicle) {
     return (
-      <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md font-sans">
-        <h2 className="text-2xl font-display font-bold text-blue-600 mb-4">Register Your Vehicle</h2>
-        <p className="text-gray-600 mb-4">You need to register a vehicle to get your fuel QR code.</p>
-        
-        <form onSubmit={handleRegisterVehicle} className="flex flex-col gap-4">
-          <input 
-            type="text" placeholder="Vehicle Number (e.g., CBA-1234)" required
-            className="border p-2 rounded focus:outline-blue-500 uppercase"
-            value={vehicleNumber} onChange={(e) => setVehicleNumber(e.target.value)}
-          />
-          <select 
-            className="border p-2 rounded focus:outline-blue-500 bg-white"
-            value={fuelType} onChange={(e) => setFuelType(e.target.value)}
-          >
-            <option value="Petrol">Petrol</option>
-            <option value="Diesel">Diesel</option>
-          </select>
-          <button type="submit" className="bg-blue-600 text-white font-bold p-2 rounded hover:bg-blue-700">
-            Register Vehicle
-          </button>
-        </form>
+      <div className="max-w-md mx-auto">
+        <div className="glass-strong rounded-3xl p-8 modal-card">
+          <h2 className="text-2xl font-black text-white mb-2">🚗 Register Your Vehicle</h2>
+          <p className="text-white/50 text-sm mb-6">You need to register a vehicle to get your fuel QR code.</p>
+          <form onSubmit={handleRegisterVehicle} className="flex flex-col gap-4">
+            <input 
+              type="text" placeholder="Vehicle Number (e.g., CBA-1234)" required
+              className="glass-input uppercase"
+              value={vehicleNumber} onChange={e => setVehicleNumber(e.target.value)}
+            />
+            <select 
+              className="glass-input"
+              value={fuelType} onChange={e => setFuelType(e.target.value)}
+            >
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+            </select>
+            <button type="submit" className="glass-btn w-full">Register Vehicle</button>
+          </form>
+        </div>
       </div>
     );
   }
 
-  // --- IF THEY ALREADY HAVE A VEHICLE (MAIN DASHBOARD) ---
+  /* ── Main Dashboard ── */
+  const used      = quota ? (quota.weekly_quota - quota.remaining_quota) : 0;
+  const total     = quota?.weekly_quota    ?? 20;
+  const remaining = quota?.remaining_quota ?? 0;
+  const pctLeft   = total > 0 ? (remaining / total) * 100 : 0;
+
   return (
-    <div className="flex flex-col md:flex-row gap-6 font-sans">
-      
-      {/* Left Column: QR Code & Quota */}
-      <div className="flex-1 bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
-        <h2 className="text-3xl font-display font-bold text-blue-600 mb-2">Your Fuel QR</h2>
-        <p className="text-gray-500 mb-6">{vehicle.vehicle_number} • {vehicle.fuel_type}</p>
+    <div className="flex flex-col gap-6">
+      {/* Top row */}
+      <div className="flex flex-col md:flex-row gap-6">
         
-        {/* The Magic QR Code Generator */}
-        <div className="bg-white p-4 border-4 border-blue-100 rounded-xl mb-6">
-          <QRCodeSVG value={vehicle.qr_code} size={200} />
+        {/* QR Code Card */}
+        <div className="glass-strong rounded-3xl p-6 flex flex-col items-center gap-4 flex-1">
+          <h2 className="text-xl font-black text-white self-start">📱 Your Fuel QR</h2>
+          <p className="text-white/40 text-sm self-start -mt-3">{vehicle.vehicle_number} · {vehicle.fuel_type}</p>
+          <div className="glass rounded-2xl p-4">
+            <QRCodeSVG value={vehicle.qr_code} size={170} bgColor="transparent" fgColor="#ffffff" level="H" />
+          </div>
+          <p className="text-white/30 text-xs">Show this QR at the fuel station</p>
         </div>
 
+        {/* Quota Card */}
         {quota && (
-          <div className="w-full bg-blue-50 p-4 rounded-lg border border-blue-100">
-            <h3 className="text-lg font-bold text-gray-700">Weekly Quota</h3>
-            <p className="text-4xl font-display font-bold text-blue-600 my-2">
-              {quota.remaining_quota} <span className="text-lg text-gray-500">Liters</span>
-            </p>
-            <p className="text-sm text-gray-500">of {quota.weekly_quota} Liters total</p>
+          <div className="glass-strong rounded-3xl p-6 flex flex-col gap-4 flex-1">
+            <h2 className="text-xl font-black text-white">⛽ Weekly Quota</h2>
+            <div className="text-center my-2">
+              <span className="text-6xl font-black text-white">{remaining}</span>
+              <span className="text-2xl text-white/40"> / {total}L</span>
+            </div>
+            {/* Progress bar */}
+            <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${pctLeft}%`,
+                  background: pctLeft > 50 ? 'linear-gradient(90deg,#22c55e,#4ade80)' : pctLeft > 20 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#ef4444,#f87171)',
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="glass rounded-xl py-2">
+                <p className="text-xs text-white/40">Total</p>
+                <p className="font-bold text-white">{total}L</p>
+              </div>
+              <div className="glass rounded-xl py-2">
+                <p className="text-xs text-white/40">Used</p>
+                <p className="font-bold text-orange-300">{used}L</p>
+              </div>
+              <div className="glass rounded-xl py-2">
+                <p className="text-xs text-white/40">Left</p>
+                <p className="font-bold text-green-300">{remaining}L</p>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Right Column: Transaction History */}
-      <div className="flex-1 bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-display font-bold text-gray-800 mb-4">Fuel History</h2>
-        
+      {/* Transaction History */}
+      <div className="glass-strong rounded-3xl p-6">
+        <h2 className="text-xl font-black text-white mb-4">📋 Fuel History</h2>
         {history.length === 0 ? (
-          <p className="text-gray-500 italic">No fuel transactions yet.</p>
+          <p className="text-white/30 italic text-sm">No fuel transactions yet.</p>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {history.map((tx) => (
-              <div key={tx.id} className="flex justify-between items-center border-b pb-2">
+              <div key={tx.id} className="glass rounded-2xl px-5 py-3 flex justify-between items-center">
                 <div>
-                  <p className="font-bold text-gray-700">Fuel Station #{tx.station_id}</p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(tx.created_at).toLocaleDateString()}
-                  </p>
+                  <p className="font-semibold text-white text-sm">Station #{tx.station_id}</p>
+                  <p className="text-xs text-white/40">{new Date(tx.created_at).toLocaleString()}</p>
                 </div>
-                <div className="text-red-500 font-bold">
-                  -{tx.liters_deducted} L
-                </div>
+                <div className="text-red-300 font-black text-lg">-{tx.liters_deducted}L</div>
               </div>
             ))}
           </div>
         )}
       </div>
-
     </div>
   );
 }

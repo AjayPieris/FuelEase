@@ -1,103 +1,166 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/axios'; // This is the shortcut we made earlier!
+import api from '../api/axios';
+import ImageUploader from './ImageUploader';
 
 export default function Auth() {
-  // 1. Set up our "state" (React's memory for what the user is typing)
-  const [isLogin, setIsLogin] = useState(true); // Toggles between Login and Register
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [role, setRole] = useState('user');
-  const [error, setError] = useState('');
-  
-  // 2. This hook lets us change pages automatically
+  const [isLogin, setIsLogin]                   = useState(true);
+  const [email, setEmail]                        = useState('');
+  const [password, setPassword]                  = useState('');
+  const [name, setName]                          = useState('');
+  const [role, setRole]                          = useState('user');
+  const [error, setError]                        = useState('');
+  const [nicNumber, setNicNumber]                = useState('');
+  const [nicImageUrl, setNicImageUrl]            = useState('');
+  const [documentUrl, setDocumentUrl]            = useState('');
+  const [district, setDistrict]                  = useState('');
+  const [profilePictureUrl, setProfilePictureUrl] = useState('');
   const navigate = useNavigate();
 
-  // 3. What happens when the user clicks Submit?
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Stops the page from refreshing
-    setError(''); // Clear any old errors
+    e.preventDefault();
+    setError('');
 
     try {
       let response;
-      
-      // Send the data to the correct Laravel URL
       if (isLogin) {
         response = await api.post('/login', { email, password });
       } else {
-        response = await api.post('/register', { name, email, password, role });
+        const payload = { name, email, password, role };
+        if (profilePictureUrl) payload.profile_picture_url = profilePictureUrl;
+
+        if (role === 'user') {
+          if (!nicNumber || !nicImageUrl) {
+            setError('Vehicle Owners must provide a NIC number and NIC photo.');
+            return;
+          }
+          payload.nic_number    = nicNumber;
+          payload.nic_image_url = nicImageUrl;
+        }
+
+        if (role === 'station') {
+          if (!documentUrl || !district) {
+            setError('Fuel Stations must provide a valid document URL and select a District.');
+            return;
+          }
+          payload.document_url = documentUrl;
+          payload.district     = district;
+        }
+
+        response = await api.post('/register', payload);
       }
 
-      // 4. Save the "VIP Token" to the browser's memory
+      // Save token AND user object to localStorage
       localStorage.setItem('fuelease_token', response.data.token);
-      
-      // 5. Look at the user's role and send them to the correct dashboard!
+      localStorage.setItem('fuelease_user', JSON.stringify(response.data.user));
+
       const userRole = response.data.user.role;
-      if (userRole === 'admin') navigate('/admin');
+      if (userRole === 'admin')        navigate('/admin');
       else if (userRole === 'station') navigate('/station');
-      else navigate('/user'); // Default to standard user
-      
+      else                             navigate('/user');
+
     } catch (err) {
-      // If Laravel rejects the login, show the error message
       setError(err.response?.data?.message || 'Something went wrong. Check your details.');
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md border border-gray-200">
-      <h2 className="text-3xl font-display font-bold text-center text-blue-600 mb-6">
-        {isLogin ? 'Welcome Back!' : 'Create an Account'}
-      </h2>
+    <div className="min-h-[80vh] flex items-center justify-center">
+      <div className="glass-strong rounded-3xl w-full max-w-md mx-auto p-8 modal-card">
+        <h2 className="text-3xl font-black text-center text-white mb-6">
+          {isLogin ? '👋 Welcome Back' : '🚀 Create Account'}
+        </h2>
 
-      {/* Show error messages if there are any */}
-      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">{error}</div>}
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-sans">
-        
-        {/* Only show Name and Role inputs if the user is Registering */}
-        {!isLogin && (
-          <>
-            <input 
-              type="text" placeholder="Full Name" required
-              className="border p-2 rounded focus:outline-blue-500"
-              value={name} onChange={(e) => setName(e.target.value)}
-            />
-            <select 
-              className="border p-2 rounded focus:outline-blue-500 bg-white"
-              value={role} onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="user">Vehicle Owner</option>
-              <option value="station">Fuel Station</option>
-            </select>
-          </>
+        {error && (
+          <div className="bg-red-500/20 border border-red-400/30 text-red-300 p-3 rounded-xl mb-4 text-sm">
+            {error}
+          </div>
         )}
 
-        {/* Email and Password are required for both Login and Register */}
-        <input 
-          type="email" placeholder="Email Address" required
-          className="border p-2 rounded focus:outline-blue-500"
-          value={email} onChange={(e) => setEmail(e.target.value)}
-        />
-        <input 
-          type="password" placeholder="Password" required minLength="6"
-          className="border p-2 rounded focus:outline-blue-500"
-          value={password} onChange={(e) => setPassword(e.target.value)}
-        />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {!isLogin && (
+            <>
+              <input
+                type="text" placeholder="Full Name" required
+                className="glass-input"
+                value={name} onChange={e => setName(e.target.value)}
+              />
+              <select
+                className="glass-input"
+                value={role} onChange={e => setRole(e.target.value)}
+              >
+                <option value="user">Vehicle Owner</option>
+                <option value="station">Fuel Station</option>
+              </select>
 
-        <button type="submit" className="bg-blue-600 text-white font-bold p-2 rounded mt-2 hover:bg-blue-700 transition">
-          {isLogin ? 'Login' : 'Register'}
-        </button>
-      </form>
+              <div className="glass rounded-2xl p-4 flex flex-col gap-2">
+                <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">Profile Picture (Optional)</label>
+                <ImageUploader onUploadSuccess={url => setProfilePictureUrl(url)} label="Upload Profile Picture" altText="Profile Preview" />
+              </div>
 
-      {/* Button to toggle between Login and Register modes */}
-      <div className="mt-4 text-center">
-        <button 
-          onClick={() => setIsLogin(!isLogin)} 
-          className="text-sm text-gray-500 hover:text-blue-600 underline"
-        >
-          {isLogin ? "Don't have an account? Register here." : "Already have an account? Login here."}
-        </button>
+              {role === 'user' && (
+                <div className="glass rounded-2xl p-4 flex flex-col gap-3">
+                  <label className="text-xs font-semibold text-blue-300 uppercase tracking-wider">Vehicle Owner Verification</label>
+                  <input
+                    type="text" placeholder="NIC Number (e.g. 199012345678)" required
+                    className="glass-input uppercase"
+                    value={nicNumber} onChange={e => setNicNumber(e.target.value)}
+                  />
+                  <ImageUploader onUploadSuccess={url => setNicImageUrl(url)} label="Upload NIC Photo" altText="NIC Preview" />
+                </div>
+              )}
+
+              {role === 'station' && (
+                <div className="glass rounded-2xl p-4 flex flex-col gap-3">
+                  <label className="text-xs font-semibold text-green-300 uppercase tracking-wider">Fuel Station Verification</label>
+                  <select
+                    required
+                    className="glass-input"
+                    value={district} onChange={e => setDistrict(e.target.value)}
+                  >
+                    <option value="" disabled>Select District</option>
+                    {[
+                      "Ampara","Anuradhapura","Badulla","Batticaloa","Colombo","Galle","Gampaha",
+                      "Hambantota","Jaffna","Kalutara","Kandy","Kegalle","Kilinochchi","Kurunegala",
+                      "Mannar","Matale","Matara","Monaragala","Mullaitivu","Nuwara Eliya","Polonnaruwa",
+                      "Puttalam","Ratnapura","Trincomalee","Vavuniya"
+                    ].map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <input
+                    type="url" placeholder="Paste Document URL (e.g. Google Drive link)" required
+                    className="glass-input"
+                    value={documentUrl} onChange={e => setDocumentUrl(e.target.value)}
+                  />
+                  <p className="text-xs text-green-400/70">Admins will review this document before approving your station.</p>
+                </div>
+              )}
+            </>
+          )}
+
+          <input
+            type="email" placeholder="Email Address" required
+            className="glass-input"
+            value={email} onChange={e => setEmail(e.target.value)}
+          />
+          <input
+            type="password" placeholder="Password" required minLength="6"
+            className="glass-input"
+            value={password} onChange={e => setPassword(e.target.value)}
+          />
+
+          <button type="submit" className="glass-btn w-full mt-2">
+            {isLogin ? 'Login' : 'Register'}
+          </button>
+        </form>
+
+        <div className="mt-5 text-center">
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-sm text-white/50 hover:text-white/80 underline transition"
+          >
+            {isLogin ? "Don't have an account? Register here." : "Already have an account? Login here."}
+          </button>
+        </div>
       </div>
     </div>
   );
