@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/stations',         [StationController::class, 'setupStation']);
     Route::post('/stations/scan',    [StationController::class, 'deductFuel']);
     Route::post('/station/resubmit', [StationController::class, 'resubmitDocument']);
+    Route::patch('/station/availability', [StationController::class, 'updateAvailability']);
 
     // Admin
     Route::get('/admin/users',                      [AdminController::class, 'getAllUsers']);

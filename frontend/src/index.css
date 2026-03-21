@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap');
 
 @layer base {
   *, *::before, *::after {
@@ -15,11 +15,12 @@
   }
 }
 
-/* ── Animated gradient background ── */
+/* ── Light gradient background ── */
 body {
-  background: linear-gradient(135deg, #0f0c29, #1a1a6e, #1b1b4b, #0a0a2e, #1e0a3c);
+  background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf1 25%, #eef1f6 50%, #e4e8ee 75%, #f0f2f5 100%);
   background-size: 400% 400%;
-  animation: gradientShift 14s ease infinite;
+  animation: gradientShift 20s ease infinite;
+  color: #1e293b;
 }
 
 @keyframes gradientShift {
@@ -28,24 +29,108 @@ body {
   100% { background-position: 0% 50%; }
 }
 
-/* ── Glass card ── */
+/* ══════════════════════════════════════════════
+   LIQUID GLASS — Only for Navbars & Modals
+   ══════════════════════════════════════════════ */
 .glass {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.13);
-  backdrop-filter: blur(36px);
-  -webkit-backdrop-filter: blur(36px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(40px) saturate(2);
+  -webkit-backdrop-filter: blur(40px) saturate(2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
-/* ── Glass input ── */
+/* ══════════════════════════════════════════════
+   SOLID CARDS — For Body Content
+   ══════════════════════════════════════════════ */
+.solid-card {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.solid-card-hover {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
+}
+.solid-card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+/* ── Solid Inputs ── */
+.solid-input {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  color: #1e293b;
+  border-radius: 12px;
+  padding: 10px 14px;
+  width: 100%;
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.9375rem;
+}
+.solid-input::placeholder { color: #94a3b8; }
+.solid-input:focus {
+  border-color: #818cf8;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+.solid-input option { background: #ffffff; color: #1e293b; }
+
+/* ── Solid Primary Button ── */
+.solid-btn {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  color: white;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+.solid-btn:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+.solid-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Solid Outline Button ── */
+.solid-btn-outline {
+  background: transparent;
+  border: 1.5px solid #e2e8f0;
+  color: #475569;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.solid-btn-outline:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.04);
+}
+
+/* ── Glass inputs (kept for nav dropdowns & modals) ── */
 .glass-input {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -62,9 +147,8 @@ body {
   background: rgba(255, 255, 255, 0.12);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
 }
-.glass-input option { background: #1a1a6e; color: white; }
+.glass-input option { background: #1e293b; color: white; }
 
-/* ── Glass button ── */
 .glass-btn {
   background: rgba(139, 92, 246, 0.35);
   border: 1px solid rgba(139, 92, 246, 0.5);
@@ -85,12 +169,12 @@ body {
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 99px; }
 
 /* ── Modal overlay ── */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(6px);
   z-index: 50;
   display: flex;
@@ -111,4 +195,26 @@ body {
 
 .modal-card {
   animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Status badges ── */
+.badge-green {
+  background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;
+  padding: 4px 12px; border-radius: 9999px; font-weight: 700; font-size: 0.75rem;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.badge-yellow {
+  background: #fefce8; color: #ca8a04; border: 1px solid #fde68a;
+  padding: 4px 12px; border-radius: 9999px; font-weight: 700; font-size: 0.75rem;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.badge-red {
+  background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;
+  padding: 4px 12px; border-radius: 9999px; font-weight: 700; font-size: 0.75rem;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.badge-indigo {
+  background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe;
+  padding: 4px 12px; border-radius: 9999px; font-weight: 700; font-size: 0.75rem;
+  display: inline-flex; align-items: center; gap: 6px;
 }

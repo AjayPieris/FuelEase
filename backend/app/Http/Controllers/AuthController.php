@@ -96,12 +96,13 @@ class AuthController extends Controller
         ]);
     }
 
-    // --- UPDATE ACCOUNT (name / password) ---
+    // --- UPDATE ACCOUNT (name / password / profile picture) ---
     public function updateAccount(Request $request)
     {
         $request->validate([
             'name'     => 'sometimes|string',
             'password' => 'sometimes|string|min:6',
+            'profile_picture_url' => 'nullable|string|url',
         ]);
 
         $user = $request->user();
@@ -111,6 +112,9 @@ class AuthController extends Controller
         }
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
+        }
+        if ($request->has('profile_picture_url')) {
+            $user->profile_picture_url = $request->profile_picture_url;
         }
 
         $user->save();

@@ -14,8 +14,8 @@ class StationController extends Controller
     public function getPublicStations()
     {
         $stations = Station::where('approval_status', 'approved')
-            ->select('id', 'name', 'district', 'location', 'is_available')
-            ->get();
+            ->with(['user:id,name,profile_picture_url'])
+            ->get(['id', 'user_id', 'name', 'district', 'location', 'is_available']);
         return response()->json($stations, 200);
     }
 
@@ -121,5 +121,32 @@ class StationController extends Controller
             'message'          => 'Fuel deducted successfully!',
             'remaining_quota'  => $quota->remaining_quota,
         ], 200);
+    }
+
+    // --- 5. UPDATE QUEUE STATUS (AVAILABILITY) ---
+    public function updateAvailability(Request $request)
+    {
+        $request->validate([
+            'is_available' => 'required|in:available,long_queue,empty,1,0,true,false'
+        ]);
+
+        $station = Station::where('user_id', $request->user()->id)->first();
+        
+        if (!$station) {
+            return response()->json(['message' => 'Station not found.'], 404);
+        }
+
+        $statusVal = $request->is_available;
+        if ($statusVal === 'empty' || $statusVal === 'false' || $statusVal === 0 || $statusVal === '0') {
+            $station->is_available = 'empty';
+        } else if ($statusVal === 'long_queue') {
+            $station->is_available = 'long_queue';
+        } else {
+            $station->is_available = 'available';
+        }
+
+        $station->save();
+
+        return response()->json(['message' => 'Availability updated', 'station' => $station], 200);
     }
 }
