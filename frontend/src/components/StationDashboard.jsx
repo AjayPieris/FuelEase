@@ -194,39 +194,6 @@ export default function StationDashboard() {
         </div>
       </div>
 
-      {/* Queue Status Controls */}
-      <div className="solid-card p-6 sm:p-8">
-        <h3 className="text-lg font-black text-slate-800 mb-1">Queue Status</h3>
-        <p className="text-sm text-slate-400 font-medium mb-4">Update your real-time station status</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {statusOptions.map(opt => {
-            const Icon = opt.icon;
-            const isActive = stationStatus === opt.value;
-            const colorMap = {
-              emerald: { active: 'border-emerald-500 bg-emerald-50', icon: 'bg-emerald-500 text-white shadow-emerald-200', text: 'text-emerald-700', desc: 'text-emerald-500/70' },
-              amber: { active: 'border-amber-500 bg-amber-50', icon: 'bg-amber-500 text-white shadow-amber-200', text: 'text-amber-700', desc: 'text-amber-500/70' },
-              red: { active: 'border-red-500 bg-red-50', icon: 'bg-red-500 text-white shadow-red-200', text: 'text-red-700', desc: 'text-red-500/70' },
-            };
-            const c = colorMap[opt.color];
-
-            return (
-              <button
-                key={opt.value}
-                onClick={() => handleStatusUpdate(opt.value)}
-                className={`flex items-center gap-3.5 p-4 rounded-2xl border-2 transition-all active:scale-95 ${isActive ? c.active : 'border-slate-100 bg-white hover:bg-slate-50'}`}
-              >
-                <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center transition-colors shadow-sm ${isActive ? c.icon : 'bg-slate-100 text-slate-400'}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <p className={`text-sm font-bold ${isActive ? c.text : 'text-slate-700'}`}>{opt.label}</p>
-                  <p className={`text-[10px] font-semibold mt-0.5 ${isActive ? c.desc : 'text-slate-400'}`}>{opt.desc}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Scan & Deduct Form */}
       <div className="solid-card p-6 sm:p-8">

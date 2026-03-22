@@ -8,10 +8,15 @@ export default function StationStatusModal({ onClose, stationStatus, setStationS
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    api.get("/station")
-      .then((res) => setStation(res.data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    const fetchStation = () => {
+      api.get("/station")
+        .then((res) => setStation(res.data))
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
+    };
+    fetchStation();
+    const interval = setInterval(fetchStation, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleStatusUpdate = async (statusVal) => {

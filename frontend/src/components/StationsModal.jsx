@@ -26,10 +26,15 @@ export default function StationsModal({ onClose }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/stations')
-      .then(r => setStations(r.data || []))
-      .catch(() => setStations([]))
-      .finally(() => setLoading(false));
+    const fetchStations = () => {
+      api.get('/stations')
+        .then(r => setStations(r.data || []))
+        .catch(() => setStations([]))
+        .finally(() => setLoading(false));
+    };
+    fetchStations();
+    const interval = setInterval(fetchStations, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const filtered = stations.filter(s => {
