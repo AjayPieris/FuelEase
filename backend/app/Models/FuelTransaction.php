@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['user_id', 'station_id', 'liters_deducted'])]
+#[Fillable(['user_id', 'station_id', 'vehicle_id', 'liters_deducted'])]
 class FuelTransaction extends Model
 {
     use HasFactory;
@@ -19,5 +19,10 @@ class FuelTransaction extends Model
     public function station()
     {
         return $this->belongsTo(Station::class);
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(\App\Models\Vehicle::class);
     }
 }

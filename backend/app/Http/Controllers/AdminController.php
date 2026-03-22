@@ -41,7 +41,7 @@ class AdminController extends Controller
     public function getAllTransactions(Request $request)
     {
         $this->requireAdmin($request);
-        return response()->json(FuelTransaction::with(['user.vehicles', 'station'])->latest()->get(), 200);
+        return response()->json(FuelTransaction::with(['user.vehicles', 'station', 'vehicle'])->latest()->get(), 200);
     }
 
     // ─── APPROVE / REJECT STATION ─────────────────────────
@@ -140,24 +140,11 @@ class AdminController extends Controller
         $weeklyQuota = $quotaMap[$vehicle->fuel_type] ?? 20;
 
         $vehicle->update([
-            'status'  => 'approved',
-            'qr_code' => $qrString,
+            'status'          => 'approved',
+            'qr_code'         => $qrString,
+            'weekly_quota'    => $weeklyQuota,
+            'remaining_quota' => $weeklyQuota,
         ]);
-
-        // Create or update fuel quota for this user
-        $existingQuota = FuelQuota::where('user_id', $vehicle->user_id)->first();
-        if (!$existingQuota) {
-            FuelQuota::create([
-                'user_id'         => $vehicle->user_id,
-                'weekly_quota'    => $weeklyQuota,
-                'remaining_quota' => $weeklyQuota,
-            ]);
-        } else {
-            $existingQuota->update([
-                'weekly_quota'    => $existingQuota->weekly_quota + $weeklyQuota,
-                'remaining_quota' => $existingQuota->remaining_quota + $weeklyQuota,
-            ]);
-        }
 
         return response()->json([
             'message' => 'Vehicle approved and QR generated!',

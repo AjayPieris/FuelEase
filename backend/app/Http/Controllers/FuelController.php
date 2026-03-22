@@ -8,19 +8,25 @@ use Illuminate\Http\Request;
 
 class FuelController extends Controller
 {
-    // --- 1. VIEW REMAINING QUOTA ---
     public function getQuota(Request $request)
     {
-        // Find the quota that belongs to the currently logged-in user
-        $quota = FuelQuota::where('user_id', $request->user()->id)->first();
+        // Find all approved vehicles for the user
+        $vehicles = \App\Models\Vehicle::where('user_id', $request->user()->id)
+            ->where('status', 'approved')
+            ->get();
         
-        // If they don't have a quota yet, tell them
-        if (!$quota) {
-            return response()->json(['message' => 'No quota found for this user.'], 404);
+        if ($vehicles->isEmpty()) {
+            return response()->json(['message' => 'No approved vehicles found for this user.'], 404);
         }
 
-        // Send the quota data back to the frontend
-        return response()->json($quota, 200);
+        $totalWeekly = $vehicles->sum('weekly_quota');
+        $totalRemaining = $vehicles->sum('remaining_quota');
+
+        return response()->json([
+            'weekly_quota' => $totalWeekly,
+            'remaining_quota' => $totalRemaining,
+            'vehicles_quota' => $vehicles->map->only(['id', 'weekly_quota', 'remaining_quota'])
+        ], 200);
     }
 
     // --- 2. VIEW FUEL HISTORY ---
@@ -34,12 +40,12 @@ class FuelController extends Controller
                 return response()->json([], 200);
             }
             $history = FuelTransaction::where('station_id', $station->id)
-                                      ->with(['user', 'user.vehicles'])
+                                      ->with(['user', 'user.vehicles', 'vehicle'])
                                       ->latest()
                                       ->get();
         } else {
             $history = FuelTransaction::where('user_id', $user->id)
-                                      ->with(['station'])
+                                      ->with(['station', 'vehicle'])
                                       ->latest()
                                       ->get();
         }

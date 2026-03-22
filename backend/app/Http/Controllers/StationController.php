@@ -102,24 +102,23 @@ class StationController extends Controller
             return response()->json(['message' => 'Invalid QR Code! Vehicle not found.'], 404);
         }
 
-        $quota = FuelQuota::where('user_id', $vehicle->user_id)->first();
-
-        if ($quota->remaining_quota < $request->liters) {
-            return response()->json(['message' => 'Not enough fuel quota remaining!'], 400);
+        if ($vehicle->remaining_quota < $request->liters) {
+            return response()->json(['message' => 'Not enough fuel quota remaining for this vehicle!'], 400);
         }
 
-        $quota->remaining_quota -= $request->liters;
-        $quota->save();
+        $vehicle->remaining_quota -= $request->liters;
+        $vehicle->save();
 
         FuelTransaction::create([
             'user_id'         => $vehicle->user_id,
             'station_id'      => $station->id,
+            'vehicle_id'      => $vehicle->id,
             'liters_deducted' => $request->liters,
         ]);
 
         return response()->json([
             'message'          => 'Fuel deducted successfully!',
-            'remaining_quota'  => $quota->remaining_quota,
+            'remaining_quota'  => $vehicle->remaining_quota,
         ], 200);
     }
 

@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('vehicles', function (Blueprint $table) {
-            $table->decimal('weekly_quota', 8, 2)->default(0);
-            $table->decimal('remaining_quota', 8, 2)->default(0);
+        Schema::table('fuel_transactions', function (Blueprint $table) {
+            $table->foreignId('vehicle_id')->nullable()->constrained()->onDelete('set null');
         });
     }
 
@@ -22,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('vehicles', function (Blueprint $table) {
-            $table->dropColumn(['weekly_quota', 'remaining_quota']);
+        Schema::table('fuel_transactions', function (Blueprint $table) {
+            $table->dropForeign(['vehicle_id']);
+            $table->dropColumn('vehicle_id');
         });
     }
 };

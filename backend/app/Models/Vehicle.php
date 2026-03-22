@@ -18,6 +18,8 @@ class Vehicle extends Model
         'chassis_number',
         'full_name',
         'nic_number',
+        'weekly_quota',
+        'remaining_quota',
     ];
 
     /**

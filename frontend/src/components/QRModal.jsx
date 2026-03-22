@@ -4,7 +4,8 @@ import { Smartphone, Fuel, X } from 'lucide-react';
 import api from '../api/axios';
 
 export default function QRModal({ onClose }) {
-  const [vehicle, setVehicle] = useState(null);
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedIdx, setSelectedIdx] = useState(0);
   const [quota, setQuota]     = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
@@ -12,7 +13,8 @@ export default function QRModal({ onClose }) {
   useEffect(() => {
     Promise.all([api.get('/vehicle'), api.get('/quota')])
       .then(([vRes, qRes]) => {
-        setVehicle(vRes.data || null);
+        const vData = Array.isArray(vRes.data) ? vRes.data : (vRes.data ? [vRes.data] : []);
+        setVehicles(vData);
         setQuota(qRes.data || null);
       })
       .catch((err) => {
@@ -26,6 +28,8 @@ export default function QRModal({ onClose }) {
   const total     = quota?.weekly_quota    ?? 0;
   const remaining = quota?.remaining_quota ?? 0;
   const pctLeft   = total > 0 ? Math.round((remaining / total) * 100) : 0;
+
+  const vehicle = vehicles[selectedIdx];
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -50,10 +54,24 @@ export default function QRModal({ onClose }) {
           <div className="py-16 text-center text-slate-400 font-medium">Loading…</div>
         ) : error ? (
           <div className="py-16 text-center text-red-400 font-medium">{error}</div>
-        ) : !vehicle ? (
+        ) : vehicles.length === 0 ? (
           <div className="py-16 text-center text-slate-400 font-medium">No vehicle registered yet.</div>
         ) : (
           <div className="px-6 pb-8 flex flex-col items-center gap-6">
+
+            {/* Vehicle Selector (only if multiple) */}
+            {vehicles.length > 1 && (
+              <select
+                className="solid-input w-full font-semibold mt-4 text-center bg-slate-50 border-slate-200"
+                value={selectedIdx}
+                onChange={e => setSelectedIdx(Number(e.target.value))}
+              >
+                {vehicles.map((v, i) => (
+                  <option key={i} value={i}>{v.vehicle_number} — {v.fuel_type}</option>
+                ))}
+              </select>
+            )}
+
             {/* QR Code */}
             <div className="bg-slate-900 rounded-2xl p-5 flex flex-col items-center gap-3 mt-4">
               <QRCodeSVG

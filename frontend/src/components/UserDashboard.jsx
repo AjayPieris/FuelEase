@@ -143,9 +143,10 @@ export default function UserDashboard() {
   }
 
   /* ── Main Dashboard ── */
-  const used = quota ? (quota.weekly_quota - quota.remaining_quota) : 0;
-  const total = quota?.weekly_quota ?? 0;
-  const remaining = quota?.remaining_quota ?? 0;
+  const vehicleQuota = quota?.vehicles_quota?.find(q => q.id === vehicle?.id);
+  const total = Number(vehicleQuota?.weekly_quota || 0);
+  const remaining = Number(vehicleQuota?.remaining_quota || 0);
+  const used = total - remaining;
   const pctLeft = total > 0 ? (remaining / total) * 100 : 0;
   const currentVehicleType = VEHICLE_TYPES.find(vt => vt.value === vehicle?.fuel_type || vt.value === vehicle?.vehicle_type);
 
