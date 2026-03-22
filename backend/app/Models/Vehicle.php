@@ -20,6 +20,8 @@ class Vehicle extends Model
         'nic_number',
         'weekly_quota',
         'remaining_quota',
+        'approval_method',
+        'failure_reason',
     ];
 
     /**

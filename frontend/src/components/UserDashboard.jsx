@@ -27,7 +27,11 @@ export default function UserDashboard() {
   const [vehicleType, setVehicleType] = useState('Motorcycles');
   const [regError, setRegError] = useState('');
 
-  useEffect(() => { fetchUserData(); }, []);
+  useEffect(() => {
+    fetchUserData();
+    const interval = setInterval(fetchUserData, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchUserData = async () => {
     try {

@@ -18,7 +18,11 @@ export default function AdminUsersTable() {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+    const interval = setInterval(fetchUsers, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleBlockUser = async (id, currentStatus) => {
     try {

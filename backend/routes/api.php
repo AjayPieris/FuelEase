@@ -9,6 +9,7 @@ use App\Http\Controllers\FuelController;
 use App\Http\Controllers\StationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\RegistryController;
 
 // --- PUBLIC ROUTES ---
 Route::post('/register',  [AuthController::class, 'register']);
@@ -45,6 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/users/{id}/unblock',        [AdminController::class, 'unblockUser']);
     Route::post('/admin/vehicles/{id}/approve',     [AdminController::class, 'approveVehicle']);
     Route::post('/admin/vehicles/{id}/reject',      [AdminController::class, 'rejectVehicle']);
+
+    // Registry (Admin)
+    Route::post('/admin/registry/upload',                [RegistryController::class, 'uploadRegistry']);
+    Route::get('/admin/registry/files',                  [RegistryController::class, 'getRegistryFiles']);
+    Route::delete('/admin/registry/files/{id}',          [RegistryController::class, 'deleteRegistryFile']);
+    Route::get('/admin/registry/files/{id}/entries',     [RegistryController::class, 'getRegistryEntries']);
 
     // Account Management
     Route::put('/account', [AuthController::class, 'updateAccount']);

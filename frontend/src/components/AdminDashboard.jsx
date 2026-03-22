@@ -8,12 +8,15 @@ export default function AdminDashboard() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    api.get("/admin/transactions")
-      .then((res) => {
-        setTransactions(res.data || []);
-      })
-      .catch(() => setTransactions([]))
-      .finally(() => setLoading(false));
+    const fetchTransactions = () => {
+      api.get("/admin/transactions")
+        .then((res) => setTransactions(res.data || []))
+        .catch(() => setTransactions([]))
+        .finally(() => setLoading(false));
+    };
+    fetchTransactions();
+    const interval = setInterval(fetchTransactions, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading)

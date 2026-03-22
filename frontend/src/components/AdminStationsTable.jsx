@@ -25,7 +25,11 @@ export default function AdminStationsTable() {
     }
   };
 
-  useEffect(() => { fetchStations(); }, []);
+  useEffect(() => {
+    fetchStations();
+    const interval = setInterval(fetchStations, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleApproveStation = async (id) => {
     if (!window.confirm("Approve this station?")) return;

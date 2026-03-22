@@ -15,9 +15,12 @@ export default function StationDashboard() {
 
   useEffect(() => {
     fetchStationData();
+    const interval = setInterval(fetchStationData, 5000);
     try {
       setUser(JSON.parse(localStorage.getItem("fuelease_user")));
     } catch {}
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchStationData = async () => {
