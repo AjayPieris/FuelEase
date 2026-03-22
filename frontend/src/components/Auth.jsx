@@ -15,6 +15,7 @@ export default function Auth() {
   const [nicImageUrl, setNicImageUrl] = useState('');
   const [documentUrl, setDocumentUrl] = useState('');
   const [district, setDistrict] = useState('');
+  const [location, setLocation] = useState('');
   const [profilePictureUrl, setProfilePictureUrl] = useState('');
   const navigate = useNavigate();
 
@@ -52,12 +53,13 @@ export default function Auth() {
         }
 
         if (role === 'station') {
-          if (!documentUrl || !district) {
-            setError('Fuel Stations must provide a valid document URL and select a District.');
+          if (!documentUrl || !district || !location) {
+            setError('Fuel Stations must provide a valid document URL, select a District, and specify a Location.');
             return;
           }
           payload.document_url = documentUrl;
           payload.district = district;
+          payload.location = location;
         }
 
         response = await api.post('/register', payload);
@@ -133,28 +135,45 @@ export default function Auth() {
               )}
 
               {role === 'station' && (
-                <div className="solid-card p-4 flex flex-col gap-3 border-l-4 border-emerald-400">
-                  <label className="text-xs font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <FileCheck className="w-3.5 h-3.5" /> Fuel Station Verification
+                <div className="solid-card p-4 flex flex-col gap-4 border-l-4 border-emerald-400">
+                  <label className="text-xs font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                    <FileCheck className="w-4 h-4" /> Fuel Station Verification
                   </label>
-                  <select
-                    required className="solid-input"
-                    value={district} onChange={e => setDistrict(e.target.value)}
-                  >
-                    <option value="" disabled>Select District</option>
-                    {[
-                      "Ampara","Anuradhapura","Badulla","Batticaloa","Colombo","Galle","Gampaha",
-                      "Hambantota","Jaffna","Kalutara","Kandy","Kegalle","Kilinochchi","Kurunegala",
-                      "Mannar","Matale","Matara","Monaragala","Mullaitivu","Nuwara Eliya","Polonnaruwa",
-                      "Puttalam","Ratnapura","Trincomalee","Vavuniya"
-                    ].map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <input
-                    type="url" placeholder="Paste Document URL (e.g. Google Drive link)" required
-                    className="solid-input"
-                    value={documentUrl} onChange={e => setDocumentUrl(e.target.value)}
-                  />
-                  <p className="text-xs text-emerald-600/70">Admins will review this document before approving your station.</p>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Location / Town</label>
+                    <input
+                      type="text" placeholder="e.g., Colombo 03" required
+                      className="solid-input"
+                      value={location} onChange={e => setLocation(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">District</label>
+                    <select
+                      required className="solid-input"
+                      value={district} onChange={e => setDistrict(e.target.value)}
+                    >
+                      <option value="" disabled>Select District</option>
+                      {[
+                        "Ampara","Anuradhapura","Badulla","Batticaloa","Colombo","Galle","Gampaha",
+                        "Hambantota","Jaffna","Kalutara","Kandy","Kegalle","Kilinochchi","Kurunegala",
+                        "Mannar","Matale","Matara","Monaragala","Mullaitivu","Nuwara Eliya","Polonnaruwa",
+                        "Puttalam","Ratnapura","Trincomalee","Vavuniya"
+                      ].map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">BR Document URL</label>
+                    <input
+                      type="url" placeholder="Paste Document URL (e.g. Google Drive link)" required
+                      className="solid-input"
+                      value={documentUrl} onChange={e => setDocumentUrl(e.target.value)}
+                    />
+                    <p className="text-[10px] text-emerald-600/70 mt-1.5 font-bold">Admins review this document before approving your station.</p>
+                  </div>
                 </div>
               )}
             </>

@@ -38,10 +38,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/users',                      [AdminController::class, 'getAllUsers']);
     Route::get('/admin/stations',                   [AdminController::class, 'getAllStations']);
     Route::get('/admin/transactions',               [AdminController::class, 'getAllTransactions']);
+    Route::get('/admin/vehicles',                   [AdminController::class, 'getAllVehicles']);
     Route::post('/admin/stations/{id}/approve',     [AdminController::class, 'approveStation']);
     Route::post('/admin/stations/{id}/reject',      [AdminController::class, 'rejectStation']);
     Route::post('/admin/users/{id}/block',          [AdminController::class, 'blockUser']);
     Route::post('/admin/users/{id}/unblock',        [AdminController::class, 'unblockUser']);
+    Route::post('/admin/vehicles/{id}/approve',     [AdminController::class, 'approveVehicle']);
+    Route::post('/admin/vehicles/{id}/reject',      [AdminController::class, 'rejectVehicle']);
 
     // Account Management
     Route::put('/account', [AuthController::class, 'updateAccount']);

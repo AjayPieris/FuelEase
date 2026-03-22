@@ -79,7 +79,7 @@ export default function StationDashboard() {
       </div>
     );
 
-  /* ── REJECTED ── */
+  /* ── REJECTED OR MISSING ── */
   if (station?.approval_status === "rejected") {
     return (
       <div className="max-w-md mx-auto">
@@ -121,6 +121,33 @@ export default function StationDashboard() {
           <div className="bg-slate-50 rounded-2xl px-5 py-4 text-slate-600 text-sm mt-3">
             Your station <span className="font-bold text-slate-800">{station.name}</span> has been submitted. An admin is reviewing your document. You'll be able to scan QR codes once approved.
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── MISSING PROFILE (Legacy User) ── */
+  if (!station || !station.id) {
+    return (
+      <div className="max-w-md mx-auto">
+        <div className="solid-card p-8 modal-card border-t-4 border-red-400 text-center">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-red-50 flex items-center justify-center mb-4">
+            <AlertTriangle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-black text-slate-800 mb-3">Station Profile Missing</h2>
+          <div className="bg-slate-50 rounded-2xl px-5 py-4 text-slate-600 text-sm mt-3 mb-5">
+            Your account was created but no station profile exists. Due to a system update, please re-register a new account to set up your station correctly.
+          </div>
+          <button 
+            onClick={() => {
+              localStorage.removeItem("fuelease_token");
+              localStorage.removeItem("fuelease_user");
+              window.location.href = "/";
+            }} 
+            className="solid-btn w-full py-3"
+          >
+            Logout to Re-register
+          </button>
         </div>
       </div>
     );

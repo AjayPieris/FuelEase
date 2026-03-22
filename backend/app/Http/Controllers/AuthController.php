@@ -57,7 +57,7 @@ class AuthController extends Controller
                 'district'        => $request->district,
                 'document_url'    => $request->document_url,
                 'approval_status' => 'pending',
-                'is_available'    => false,
+                'is_available'    => 'empty', // Use string value matching our queue logic
             ]);
         }
 

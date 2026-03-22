@@ -26,12 +26,24 @@ class FuelController extends Controller
     // --- 2. VIEW FUEL HISTORY ---
     public function getHistory(Request $request)
     {
-        // Get all transactions for this user, ordered by the newest first
-        $history = FuelTransaction::where('user_id', $request->user()->id)
-                                  ->latest()
-                                  ->get();
-                                  
-        // Send the list of transactions back
+        $user = $request->user();
+
+        if ($user->role === 'station') {
+            $station = \App\Models\Station::where('user_id', $user->id)->first();
+            if (!$station) {
+                return response()->json([], 200);
+            }
+            $history = FuelTransaction::where('station_id', $station->id)
+                                      ->with(['user', 'user.vehicles'])
+                                      ->latest()
+                                      ->get();
+        } else {
+            $history = FuelTransaction::where('user_id', $user->id)
+                                      ->with(['station'])
+                                      ->latest()
+                                      ->get();
+        }
+
         return response()->json($history, 200);
     }
 }

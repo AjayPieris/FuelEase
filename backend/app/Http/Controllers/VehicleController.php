@@ -5,49 +5,48 @@ namespace App\Http\Controllers;
 use App\Models\Vehicle;
 use App\Models\FuelQuota;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class VehicleController extends Controller
 {
+    /**
+     * Register a new vehicle — sets status to 'pending', no QR generated yet.
+     */
     public function registerVehicle(Request $request)
     {
-        // 1. Check if the user provided the required details
         $request->validate([
             'vehicle_number' => 'required|string|unique:vehicles',
-            'fuel_type' => 'required|string', // e.g., Petrol or Diesel
+            'fuel_type'      => 'required|string',
+            'chassis_number' => 'nullable|string',
+            'full_name'      => 'nullable|string',
+            'nic_number'     => 'nullable|string',
         ]);
 
-        // 2. Generate a random, unique string for the QR code
-        $qrString = 'QR-' . strtoupper(Str::random(10));
-
-        // 3. Save the vehicle to the database
-        // $request->user()->id automatically gets the ID of the logged-in user!
         $vehicle = Vehicle::create([
-            'user_id' => $request->user()->id, 
+            'user_id'        => $request->user()->id,
             'vehicle_number' => $request->vehicle_number,
-            'fuel_type' => $request->fuel_type,
-            'qr_code' => $qrString
+            'fuel_type'      => $request->fuel_type,
+            'chassis_number' => $request->chassis_number,
+            'full_name'      => $request->full_name,
+            'nic_number'     => $request->nic_number,
+            'qr_code'        => null,   // No QR until admin approves
+            'status'         => 'pending',
         ]);
 
-        // 4. Automatically give this user their first weekly fuel quota (e.g., 20 liters)
-        FuelQuota::create([
-            'user_id' => $request->user()->id,
-            'weekly_quota' => 20.00,
-            'remaining_quota' => 20.00,
-        ]);
+        // Do NOT create FuelQuota here — only on admin approval
 
-        // 5. Send success message back
         return response()->json([
-            'message' => 'Vehicle registered successfully!',
+            'message' => 'Vehicle submitted for admin verification!',
             'vehicle' => $vehicle
         ], 201);
     }
 
+    /**
+     * Get ALL vehicles belonging to the logged-in user.
+     */
     public function getVehicle(Request $request)
     {
-        // Find the vehicle that belongs to the logged-in user
-        $vehicle = Vehicle::where('user_id', $request->user()->id)->first();
-        
-        return response()->json($vehicle, 200);
+        $vehicles = Vehicle::where('user_id', $request->user()->id)->get();
+
+        return response()->json($vehicles, 200);
     }
 }

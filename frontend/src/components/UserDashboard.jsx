@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Smartphone, Fuel, Plus, Car, Clock, AlertTriangle, ChevronDown } from 'lucide-react';
+import { Smartphone, Fuel, Plus, Car, Clock, CheckCircle } from 'lucide-react';
 import api from '../api/axios';
 
 const VEHICLE_TYPES = [
@@ -32,13 +32,15 @@ export default function UserDashboard() {
   const fetchUserData = async () => {
     try {
       const vehicleRes = await api.get('/vehicle');
-      if (vehicleRes.data) {
-        const vehicleList = Array.isArray(vehicleRes.data) ? vehicleRes.data : [vehicleRes.data];
-        setVehicles(vehicleList);
-        const [quotaRes, historyRes] = await Promise.all([api.get('/quota'), api.get('/history')]);
-        setQuota(quotaRes.data);
-        setHistory(historyRes.data);
-      }
+      const vehicleList = Array.isArray(vehicleRes.data) ? vehicleRes.data : (vehicleRes.data ? [vehicleRes.data] : []);
+      setVehicles(vehicleList);
+
+      const [quotaRes, historyRes] = await Promise.all([
+        api.get('/quota').catch(() => ({ data: null })),
+        api.get('/history').catch(() => ({ data: [] }))
+      ]);
+      setQuota(quotaRes.data);
+      setHistory(historyRes.data || []);
     } catch (error) {
       console.error('Error fetching data', error);
     } finally { setLoading(false); }
@@ -126,7 +128,7 @@ export default function UserDashboard() {
                 {VEHICLE_TYPES.map(vt => <option key={vt.value} value={vt.value}>{vt.label}</option>)}
               </select>
             </div>
-            <button type="submit" className="solid-btn w-full mt-1 flex items-center justify-center gap-2">
+            <button type="submit" className="solid-btn w-full mt-2 flex items-center justify-center gap-2">
               <Plus className="w-4 h-4" /> Submit for Verification
             </button>
             {vehicles.length > 0 && (
@@ -140,38 +142,21 @@ export default function UserDashboard() {
     );
   }
 
-  /* ── Pending Approval State ── */
-  if (vehicle && vehicle.status === 'pending') {
-    return (
-      <div className="max-w-md mx-auto">
-        <div className="solid-card p-8 text-center modal-card border-t-4 border-amber-400">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
-            <Clock className="w-8 h-8 text-amber-500" />
-          </div>
-          <h2 className="text-2xl font-black text-slate-800 mb-2">Pending Admin Approval</h2>
-          <span className="badge-yellow mb-4 inline-flex"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending Verification</span>
-          <p className="text-slate-500 text-sm mt-3">Your vehicle <strong className="text-slate-700">{vehicle.vehicle_number}</strong> is being verified. You'll receive your QR code once approved.</p>
-        </div>
-      </div>
-    );
-  }
-
   /* ── Main Dashboard ── */
   const used = quota ? (quota.weekly_quota - quota.remaining_quota) : 0;
-  const total = quota?.weekly_quota ?? 20;
+  const total = quota?.weekly_quota ?? 0;
   const remaining = quota?.remaining_quota ?? 0;
   const pctLeft = total > 0 ? (remaining / total) * 100 : 0;
-
   const currentVehicleType = VEHICLE_TYPES.find(vt => vt.value === vehicle?.fuel_type || vt.value === vehicle?.vehicle_type);
 
   return (
     <div className="flex flex-col gap-6">
       {/* Vehicle selector (if multiple) */}
       {vehicles.length > 1 && (
-        <div className="solid-card p-4 flex items-center gap-3">
+        <div className="solid-card p-4 flex items-center gap-3 animate-[slideUp_0.3s_ease]">
           <Car className="w-5 h-5 text-indigo-500" />
           <select
-            className="solid-input flex-1"
+            className="solid-input flex-1 font-semibold"
             value={selectedIdx}
             onChange={e => setSelectedIdx(Number(e.target.value))}
           >
@@ -182,99 +167,133 @@ export default function UserDashboard() {
         </div>
       )}
 
-      {/* Top row */}
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* QR Code Card */}
-        <div className="solid-card p-6 flex flex-col items-center gap-4 flex-1">
-          <div className="self-start flex items-center gap-2">
-            <Smartphone className="w-5 h-5 text-indigo-500" />
-            <h2 className="text-xl font-black text-slate-800">Your Fuel QR</h2>
+      {vehicle.status === 'pending' ? (
+        /* ── Pending Approval State ── */
+        <div className="solid-card p-8 text-center animate-[slideUp_0.4s_ease] border-t-8 border-t-amber-400">
+          <div className="w-20 h-20 mx-auto rounded-3xl bg-amber-50 flex items-center justify-center mb-6">
+            <Clock className="w-10 h-10 text-amber-500" />
           </div>
-          <p className="text-slate-400 text-sm self-start -mt-3 ml-7">{vehicle?.vehicle_number} · {vehicle?.fuel_type || vehicle?.vehicle_type}</p>
-
-          <div className="bg-slate-900 rounded-2xl p-5 flex flex-col items-center gap-3">
-            <QRCodeSVG value={vehicle?.qr_code || 'FUELEASE'} size={170} bgColor="transparent" fgColor="#ffffff" level="H" />
-            <p className="text-white/50 text-xs font-mono tracking-widest text-center select-all break-all">
-              ID: {vehicle?.qr_code || 'FUELEASE-XXXX'}
-            </p>
-          </div>
-
-          {currentVehicleType && (
-            <span className="badge-indigo">{currentVehicleType.label}</span>
-          )}
-
-          <p className="text-slate-300 text-xs">Show this QR at the fuel station</p>
+          <h2 className="text-3xl font-black text-slate-800 mb-3">Pending Admin Approval</h2>
+          <span className="badge-yellow mb-5 inline-flex"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending Verification</span>
+          <p className="text-slate-500 font-medium max-w-md mx-auto">
+            Your vehicle <strong className="text-slate-800">{vehicle.vehicle_number}</strong> is currently being verified. 
+            Waiting for Admin verification to generate your National Fuel Pass.
+          </p>
         </div>
+      ) : vehicle.status === 'rejected' ? (
+        /* ── Rejected State ── */
+        <div className="solid-card p-8 text-center animate-[slideUp_0.4s_ease] border-t-8 border-t-red-500">
+          <h2 className="text-2xl font-black text-slate-800 mb-2">Application Rejected</h2>
+          <p className="text-slate-500">Your vehicle registration was denied. Please contact support.</p>
+        </div>
+      ) : (
+        /* ── Active Approved State ── */
+        <div className="flex flex-col md:flex-row gap-6 animate-[slideUp_0.4s_ease]">
+          {/* QR Code Card */}
+          <div className="solid-card p-6 flex flex-col items-center gap-4 flex-1">
+            <div className="self-start flex items-center gap-2">
+              <Smartphone className="w-5 h-5 text-indigo-500" />
+              <h2 className="text-xl font-black text-slate-800">Your Fuel QR</h2>
+            </div>
+            <p className="text-slate-400 text-sm self-start -mt-3 ml-7">{vehicle?.vehicle_number} · {vehicle?.fuel_type}</p>
 
-        {/* Quota Card */}
-        {quota && (
+            <div className="bg-slate-900 rounded-3xl p-6 flex flex-col items-center gap-4 my-2 shadow-xl shadow-slate-200">
+              <QRCodeSVG value={vehicle?.qr_code || 'FUELEASE'} size={180} bgColor="transparent" fgColor="#ffffff" level="H" />
+              <div className="bg-white/10 px-4 py-1.5 rounded-lg border border-white/10 w-full">
+                <p className="text-white/70 text-[10px] uppercase font-bold text-center mb-0.5 tracking-wider">National Fuel Pass ID</p>
+                <p className="text-white text-sm font-mono tracking-widest text-center select-all break-all font-bold">
+                  {vehicle?.qr_code || 'FUELEASE-XXXX'}
+                </p>
+              </div>
+            </div>
+
+            {currentVehicleType && (
+              <span className="badge-indigo mt-1 text-xs px-4 py-1.5">{currentVehicleType.label} Limit</span>
+            )}
+            <p className="text-slate-400 text-xs font-medium">Show this QR at the fuel station</p>
+          </div>
+
+          {/* Quota Card */}
           <div className="solid-card p-6 flex flex-col gap-4 flex-1">
             <div className="flex items-center gap-2">
               <Fuel className="w-5 h-5 text-indigo-500" />
-              <h2 className="text-xl font-black text-slate-800">Weekly Quota</h2>
+              <h2 className="text-xl font-black text-slate-800">Weekly Quota Progress</h2>
             </div>
-            <div className="text-center my-2">
-              <span className="text-6xl font-black text-slate-800">{remaining}</span>
-              <span className="text-2xl text-slate-300"> / {total}L</span>
-            </div>
-            {/* Progress bar */}
-            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{
-                  width: `${pctLeft}%`,
-                  background: pctLeft > 50 ? 'linear-gradient(90deg,#22c55e,#4ade80)' : pctLeft > 20 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#ef4444,#f87171)',
-                }}
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-slate-50 rounded-xl py-3">
-                <p className="text-xs text-slate-400 mb-0.5">Total</p>
-                <p className="font-bold text-slate-700">{total}L</p>
+            
+            <div className="flex-1 flex flex-col justify-center gap-6 py-4">
+              <div className="text-center">
+                <span className="text-7xl font-black text-slate-800 tracking-tight">{remaining}</span>
+                <span className="text-2xl font-bold text-slate-300 ml-1">/ {total}L</span>
               </div>
-              <div className="bg-slate-50 rounded-xl py-3">
-                <p className="text-xs text-slate-400 mb-0.5">Used</p>
-                <p className="font-bold text-amber-500">{used}L</p>
+              
+              {/* Progress bar */}
+              <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                <div
+                  className="h-full rounded-full transition-all duration-1000 ease-out"
+                  style={{
+                    width: `${pctLeft}%`,
+                    background: pctLeft > 50 ? 'linear-gradient(90deg,#22c55e,#4ade80)' : pctLeft > 20 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#ef4444,#f87171)',
+                  }}
+                />
               </div>
-              <div className="bg-slate-50 rounded-xl py-3">
-                <p className="text-xs text-slate-400 mb-0.5">Left</p>
-                <p className="font-bold text-emerald-500">{remaining}L</p>
+              
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl py-3 shadow-sm hover:shadow-md transition">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Total</p>
+                  <p className="font-black text-slate-700 text-lg">{total}L</p>
+                </div>
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl py-3 shadow-sm hover:shadow-md transition">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Used</p>
+                  <p className="font-black text-amber-500 text-lg">{used}L</p>
+                </div>
+                <div className="bg-green-50/50 border border-green-100 rounded-2xl py-3 shadow-sm hover:shadow-md transition ring-1 ring-green-100/50">
+                  <p className="text-xs text-green-600/70 font-bold uppercase tracking-wider mb-1">Left</p>
+                  <p className="font-black text-green-600 text-lg">{remaining}L</p>
+                </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Add Another Vehicle */}
       <button
         onClick={() => setShowRegister(true)}
-        className="solid-btn-outline w-full flex items-center justify-center gap-2 py-3"
+        className="solid-btn flex items-center justify-center gap-2 py-3.5 mx-auto w-full md:w-auto md:px-12 mt-2"
       >
-        <Plus className="w-4 h-4" /> Add Another Vehicle
+        <Plus className="w-5 h-5" /> Add Another Vehicle
       </button>
 
-      {/* Transaction History */}
-      <div className="solid-card p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Clock className="w-5 h-5 text-indigo-500" />
-          <h2 className="text-xl font-black text-slate-800">Fuel History</h2>
-        </div>
-        {history.length === 0 ? (
-          <p className="text-slate-400 italic text-sm">No fuel transactions yet.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {history.map((tx) => (
-              <div key={tx.id} className="bg-slate-50 rounded-2xl px-5 py-3 flex justify-between items-center">
-                <div>
-                  <p className="font-semibold text-slate-700 text-sm">Station #{tx.station_id}</p>
-                  <p className="text-xs text-slate-400">{new Date(tx.created_at).toLocaleString()}</p>
-                </div>
-                <div className="text-red-500 font-black text-lg">-{tx.liters_deducted}L</div>
-              </div>
-            ))}
+      {/* Transaction History (Only show if approved and has history) */}
+      {(vehicle.status === 'approved' || history.length > 0) && (
+        <div className="solid-card p-6 animate-[slideUp_0.5s_ease]">
+          <div className="flex items-center gap-2 mb-5">
+            <Clock className="w-5 h-5 text-indigo-500" />
+            <h2 className="text-xl font-black text-slate-800">Fuel History</h2>
           </div>
-        )}
-      </div>
+          {history.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-slate-400 font-medium">No fuel transactions yet.</p>
+              <p className="text-slate-300 text-sm mt-1">Your recent fill-ups will appear here.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {history.map((tx) => (
+                <div key={tx.id} className="bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 hover:bg-slate-100/50 transition-colors">
+                  <div>
+                    <p className="font-bold text-slate-700 text-sm">{tx.station?.name || `Station #${tx.station_id}`}</p>
+                    <p className="text-xs font-semibold text-slate-400 mt-0.5">{new Date(tx.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</p>
+                  </div>
+                  <div className="flex items-center gap-3 self-end sm:self-auto">
+                    <span className="badge-green text-[10px]"><CheckCircle className="w-3 h-3" /> Completed</span>
+                    <span className="text-red-500 font-black text-xl">-{tx.liters_deducted}L</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

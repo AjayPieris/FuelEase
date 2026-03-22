@@ -64,11 +64,11 @@ export default function TransactionsModal({ onClose }) {
                       </td>
                       <td className="py-4 px-6">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 font-mono text-xs font-bold">
-                          {tx.vehicle?.qr_code || tx.qr_code || `QR-${tx.vehicle_id}`}
+                          {tx.user?.vehicles?.[0]?.qr_code || `USER-${tx.user_id}`}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-sm font-medium text-slate-500">
-                        {tx.fuel_type || tx.vehicle?.fuel_type || "N/A"}
+                        {tx.user?.vehicles?.[0]?.fuel_type || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm font-black text-slate-700 text-right">
                         {tx.liters_deducted}L

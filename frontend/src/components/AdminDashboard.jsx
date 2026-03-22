@@ -68,11 +68,11 @@ export default function AdminDashboard() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="font-mono text-xs text-slate-500 border border-slate-200 px-2 py-1 rounded-md bg-slate-50">
-                      {tx.user_qr || tx.vehicle?.qr_code || `USER-${tx.user_id}`}
+                      {tx.user?.vehicles?.[0]?.qr_code || `USER-${tx.user_id}`}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">
-                    {tx.fuel_type || tx.vehicle?.fuel_type || "N/A"}
+                    {tx.user?.vehicles?.[0]?.fuel_type || "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right font-black text-red-500">
                     -{tx.liters_deducted || tx.liters}L

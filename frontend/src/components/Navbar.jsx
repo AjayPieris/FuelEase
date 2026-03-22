@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Fuel, QrCode, Users, MapPin, Settings, LogOut, Receipt, Menu } from 'lucide-react';
+import { Fuel, QrCode, Users, MapPin, Settings, LogOut, Receipt, Menu, Car } from 'lucide-react';
 import StationsModal from './StationsModal';
 import QRModal from './QRModal';
 import ManageAccountPanel from './ManageAccountPanel';
@@ -112,6 +112,9 @@ export default function Navbar() {
               <>
                 <button onClick={() => navigate('/admin/users')} className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-white/80 hover:text-white px-3 py-1.5 rounded-xl hover:bg-white/10 transition">
                   <Users className="w-4 h-4" /> Users
+                </button>
+                <button onClick={() => navigate('/admin/vehicles')} className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-white/80 hover:text-white px-3 py-1.5 rounded-xl hover:bg-white/10 transition">
+                  <Car className="w-4 h-4" /> Vehicles
                 </button>
                 <button onClick={() => navigate('/admin/stations')} className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-white/80 hover:text-white px-3 py-1.5 rounded-xl hover:bg-white/10 transition">
                   <MapPin className="w-4 h-4" /> Stations

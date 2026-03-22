@@ -5,6 +5,7 @@ import StationDashboard from './components/StationDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import AdminUsersTable from './components/AdminUsersTable';
 import AdminStationsTable from './components/AdminStationsTable';
+import AdminVehiclesTable from './components/AdminVehiclesTable';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             <Route path="/admin"          element={<AdminDashboard />} />
             <Route path="/admin/users"    element={<AdminUsersTable />} />
             <Route path="/admin/stations" element={<AdminStationsTable />} />
+            <Route path="/admin/vehicles" element={<AdminVehiclesTable />} />
           </Routes>
         </main>
       </div>

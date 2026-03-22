@@ -68,6 +68,7 @@ export default function AdminUsersTable() {
                 <th className="px-6 py-4 text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">NIC</th>
                 <th className="px-6 py-4 text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest text-center whitespace-nowrap">NIC Photo</th>
                 <th className="px-6 py-4 text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
+                <th className="px-6 py-4 text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest text-center whitespace-nowrap">Vehicles</th>
                 <th className="px-6 py-4 pr-8 text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">Action</th>
               </tr>
             </thead>
@@ -108,6 +109,11 @@ export default function AdminUsersTable() {
                     ) : (
                       <span className="badge-green"><CheckCircle className="w-3 h-3" /> Active</span>
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <span className="inline-flex items-center justify-center bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
+                      {u.vehicles_count || 0} Registered
+                    </span>
                   </td>
                   <td className="px-6 py-4 pr-8 whitespace-nowrap text-right">
                     <button
