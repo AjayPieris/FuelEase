@@ -14,6 +14,7 @@ import {
   Bike,
   Bus,
   Truck,
+  User,
 } from "lucide-react";
 import api from "../api/axios";
 
@@ -152,9 +153,15 @@ export default function UserDashboard() {
         <aside className="flex flex-col w-full lg:w-[260px] shrink-0 gap-6 h-fit lg:sticky lg:top-10 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
           <div className="bg-white rounded-[2rem] px-5 py-4 flex items-center gap-4 shadow-[0_10px_20px_-10px_rgba(0,0,0,0.05)] transition-transform hover:-translate-y-0.5 duration-300">
             <div className="w-10 h-10 rounded-full bg-[#11153D] flex items-center justify-center shrink-0 shadow-inner overflow-hidden">
-              <span className="text-white fill-white text-[16px] font-bold">
-                {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
-              </span>
+              {(user?.profile_picture_url || user?.profile_photo_url || user?.avatar || user?.image) ? (
+                <img 
+                  src={user.profile_picture_url || user.profile_photo_url || user.avatar || user.image} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover" 
+                />
+              ) : (
+                <User className="w-[18px] h-[18px] text-white" />
+              )}
             </div>
             <div className="flex flex-col flex-1 min-w-0">
               <span className="text-[15px] font-black text-[#11153d] leading-none truncate">
@@ -208,10 +215,10 @@ export default function UserDashboard() {
           <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-2 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
             <div>
               <h1 className="text-[32px] md:text-[38px] font-black text-[#11153D] leading-[1.1] tracking-tight">
-                Good morning,
+                Welcome,
                 <br />
-                <span className="text-[#11153D]">
-                  {user?.name ? user.name.split(" ")[0] : "user"}
+                <span className="text-[#11153D] truncate block max-w-xs md:max-w-md">
+                  {user?.name || "Driver"}
                 </span>
               </h1>
               <p className="text-[#A1A5B7] font-semibold mt-3 text-[14px]">
