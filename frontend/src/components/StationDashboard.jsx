@@ -5,6 +5,7 @@ import {
   Check, Hourglass, X
 } from "lucide-react";
 import api from "../api/axios";
+import mapImg from "../assets/image.png";
 
 export default function StationDashboard() {
   const [station, setStation] = useState(null);
@@ -16,17 +17,31 @@ export default function StationDashboard() {
   const [newDocumentUrl, setNewDocumentUrl] = useState("");
   const [user, setUser] = useState(null);
   const [stationStatus, setStationStatus] = useState("available");
+  const [history, setHistory] = useState([]);
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     fetchStationData();
-    const interval = setInterval(fetchStationData, 5000);
+    fetchHistory();
+    const interval = setInterval(() => {
+       fetchStationData();
+       fetchHistory();
+    }, 5000);
     try {
       setUser(JSON.parse(localStorage.getItem("fuelease_user")));
     } catch {}
     
     return () => clearInterval(interval);
   }, []);
+
+  const fetchHistory = async () => {
+    try {
+      const res = await api.get("/history");
+      setHistory(res.data);
+    } catch (err) {
+      console.error("Error fetching history", err);
+    }
+  };
 
   const fetchStationData = async () => {
     try {
@@ -275,26 +290,9 @@ export default function StationDashboard() {
                       </div>
                    </div>
 
-                   {/* CSS MAP MODULE */}
-                   <div className="bg-[#1C1F2B] w-full rounded-[2.5rem] h-[280px] overflow-hidden relative shadow-inner">
-                      {/* CSS Map Grid Pattern Background */}
-                      <div className="absolute inset-0 opacity-[0.15]" 
-                           style={{ backgroundImage: 'linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)', backgroundSize: '60px 60px', backgroundPosition: 'center center' }}>
-                      </div>
-                      {/* Diagonal "streets" */}
-                      <div className="absolute w-[150%] h-[2px] bg-white opacity-[0.1] -rotate-45 top-1/2 left-[-25%]"></div>
-                      <div className="absolute w-[150%] h-[2px] bg-white opacity-[0.1] rotate-[30deg] top-[30%] left-[-25%]"></div>
-                      
-                      {/* Map Pin */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none drop-shadow-xl z-10 w-[70px] h-[70px] rounded-full bg-white/10 backdrop-blur-sm border border-white/20 justify-center">
-                         <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md pb-[2px]">
-                            <MapPin className="text-[#11153D] w-6 h-6 fill-[#11153D]" />
-                         </div>
-                      </div>
-
-                      <div className="absolute bottom-5 left-0 w-full text-center tracking-[0.3em] text-white/20 text-[8px] font-black uppercase">
-                         Simulated Location
-                      </div>
+                   {/* MAP IMAGE MODULE */}
+                   <div className="w-full rounded-[2.5rem] h-[280px] overflow-hidden relative shadow-inner bg-[#1C1F2B]">
+                      <img src={mapImg} alt="Station Map Location" className="w-full h-full object-cover" />
                    </div>
                 </div>
               </div>
@@ -329,34 +327,38 @@ export default function StationDashboard() {
               </div>
             )}
 
-            {/* REPORTS TAB (TRANSACTION MOCKS) */}
+            {/* REPORTS TAB (LIVE DATA) */}
             {activeTab === "reports" && (
               <div className="w-full bg-white rounded-[2rem] p-8 shadow-sm">
                  <h2 className="text-2xl font-black text-[#11153D] mb-8">Recent Transactions</h2>
                  <div className="flex flex-col gap-4">
-                    {[
-                      { id: "#TRX-0912", user: "John Doe", liters: "8.5", time: "10 mins ago", status: "Completed" },
-                      { id: "#TRX-0911", user: "Jane Smith", liters: "12.0", time: "1 hour ago", status: "Completed" },
-                      { id: "#TRX-0910", user: "Kamal Perera", liters: "5.0", time: "2 hours ago", status: "Completed" },
-                      { id: "#TRX-0909", user: "Nimal Silva", liters: "20.0", time: "3 hours ago", status: "Failed" },
-                      { id: "#TRX-0908", user: "Amila Fernando", liters: "15.5", time: "Yesterday", status: "Completed" },
-                    ].map((tx, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 rounded-[1rem] bg-[#F4F6FB] hover:bg-[#EAECEF] transition-colors">
-                         <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.status === 'Completed' ? 'bg-emerald-100/50' : 'bg-red-100/50'}`}>
-                               {tx.status === 'Completed' ? <Check className="w-5 h-5 text-emerald-500" /> : <X className="w-5 h-5 text-red-500" />}
-                            </div>
-                            <div className="flex flex-col">
-                               <span className="font-bold text-[#11153D]">{tx.user}</span>
-                               <span className="text-xs font-bold text-slate-400 mt-0.5">{tx.id} • {tx.time}</span>
-                            </div>
-                         </div>
-                         <div className="flex flex-col items-end">
-                            <span className="font-black text-[#11153D]">{tx.liters} LTR</span>
-                            <span className={`text-[10px] uppercase font-bold tracking-widest mt-1 ${tx.status === 'Completed' ? 'text-emerald-500' : 'text-red-500'}`}>{tx.status}</span>
-                         </div>
-                      </div>
-                    ))}
+                    {history.length === 0 ? (
+                      <div className="text-center py-10 text-slate-400 font-bold">No transactions processed yet.</div>
+                    ) : (
+                      history.map((tx) => {
+                        const dateObj = new Date(tx.created_at);
+                        const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const dateStr = dateObj.toLocaleDateString();
+                        // As long as the transaction exists, it is functionally completed in the DB right now based on FuelController.
+                        return (
+                          <div key={tx.id} className="flex items-center justify-between p-4 rounded-[1rem] bg-[#F4F6FB] hover:bg-[#EAECEF] transition-colors">
+                             <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-100/50">
+                                   <Check className="w-5 h-5 text-emerald-500" />
+                                </div>
+                                <div className="flex flex-col">
+                                   <span className="font-bold text-[#11153D]">{tx.user?.name || "Unknown User"}</span>
+                                   <span className="text-xs font-bold text-slate-400 mt-0.5">#{tx.id.toString().padStart(4, '0')} • {dateStr} at {timeStr}</span>
+                                </div>
+                             </div>
+                             <div className="flex flex-col items-end">
+                                <span className="font-black text-[#11153D]">{tx.liters_deducted} LTR</span>
+                                <span className="text-[10px] uppercase font-bold tracking-widest mt-1 text-emerald-500">Completed</span>
+                             </div>
+                          </div>
+                        );
+                      })
+                    )}
                  </div>
               </div>
             )}
