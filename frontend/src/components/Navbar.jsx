@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Fuel,
   QrCode,
@@ -21,6 +21,8 @@ import fuelEaseLogo from "../assets/FuelEaseLogo.png";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin');
   const [showStations, setShowStations] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showManage, setShowManage] = useState(false);
@@ -124,7 +126,7 @@ export default function Navbar() {
   return (
     <>
       {/* ── Liquid Glass Navbar ── */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-4xl glass rounded-2xl rounded-bl-3xl rounded-br-3xl px-6 py-3 flex items-center justify-between">
+      <nav className={`fixed top-4 left-1/2 -translate-x-1/2 z-40 ${isAdminPath ? "w-[98%] max-w-[1400px]" : "w-[95%] max-w-4xl"} glass rounded-2xl rounded-bl-3xl rounded-br-3xl px-6 py-3 flex items-center justify-between`}>
         {/* Brand */}
         <button
           onClick={() => navigate("/")}

@@ -119,7 +119,7 @@ export default function StationDashboard() {
     <div className="min-h-screen relative w-full flex bg-[#F8F9FD] font-sans overflow-x-hidden">
       {/* TOAST NOTIFICATION - SUCCESS */}
       {message && (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up" style={{ animationFillMode: 'both' }}>
+        <div className="fixed top-24 right-8 z-[100] animate-in fade-in slide-in-from-top-8 duration-300" style={{ animationFillMode: 'both' }}>
            <div className="bg-white rounded-full shadow-[0_15px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 flex items-center pr-4 overflow-hidden relative">
              <div className="absolute left-0 top-0 bottom-0 w-2.5 bg-[#69F0AE] rounded-l-full"></div>
              
@@ -143,7 +143,7 @@ export default function StationDashboard() {
 
       {/* TOAST NOTIFICATION - ERROR */}
       {error && (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up" style={{ animationFillMode: 'both' }}>
+        <div className="fixed top-24 right-8 z-[100] animate-in fade-in slide-in-from-top-8 duration-300" style={{ animationFillMode: 'both' }}>
            <div className="bg-white rounded-full shadow-[0_15px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 flex items-center pr-4 overflow-hidden relative">
              <div className="absolute left-0 top-0 bottom-0 w-2.5 bg-red-500 rounded-l-full"></div>
              <div className="w-[50px] h-full flex items-center justify-center shrink-0 pl-3">
