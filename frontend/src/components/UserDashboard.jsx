@@ -15,8 +15,10 @@ import {
   Bus,
   Truck,
   User,
+  LogOut,
 } from "lucide-react";
 import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
 const VEHICLE_TYPES = [
   { value: "Motorcycles", label: "Motorcycles", quota: 5 },
@@ -34,6 +36,14 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard", "vehicles", "quotas", "history", "add_vehicle"
   const [user, setUser] = useState({});
+  const [showMobileMore, setShowMobileMore] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("fuelease_token");
+    localStorage.removeItem("fuelease_user");
+    navigate("/");
+  };
 
   // Registration form
   const [fullName, setFullName] = useState("");
@@ -150,7 +160,7 @@ export default function UserDashboard() {
     <div className="min-h-screen relative w-full flex bg-[#F8F9FD] font-sans animate-fade-in overflow-x-hidden pb-16">
       <div className="flex flex-col lg:flex-row w-full max-w-[1300px] mx-auto pt-8 lg:pt-10 pb-12 gap-8 px-4 lg:px-8">
         {/* === SIDEBAR === */}
-        <aside className="flex flex-col w-full lg:w-[260px] shrink-0 gap-6 h-fit lg:sticky lg:top-10 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+        <aside className="hidden lg:flex flex-col w-full lg:w-[260px] shrink-0 gap-6 h-fit lg:sticky lg:top-10 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
           <div className="bg-white rounded-[2rem] px-5 py-4 flex items-center gap-4 shadow-[0_10px_20px_-10px_rgba(0,0,0,0.05)] transition-transform hover:-translate-y-0.5 duration-300">
             <div className="w-10 h-10 rounded-full bg-[#11153D] flex items-center justify-center shrink-0 shadow-inner overflow-hidden">
               {(user?.profile_picture_url || user?.profile_photo_url || user?.avatar || user?.image) ? (
@@ -170,7 +180,7 @@ export default function UserDashboard() {
             </div>
           </div>
 
-          <nav className="flex flex-col gap-2 relative z-10 w-full mt-2">
+          <nav className="hidden lg:flex flex-col gap-2 relative z-10 w-full mt-2">
             <button
               type="button"
               onClick={() => setActiveTab("dashboard")}
@@ -204,7 +214,7 @@ export default function UserDashboard() {
           <button
             type="button"
             onClick={() => setActiveTab("add_vehicle")}
-            className="mt-6 bg-[#69F0AE] hover:bg-[#52e89f] text-[#0A2616] font-black px-6 py-[16px] rounded-[2rem] flex items-center justify-center transition-all duration-300 w-[200px] shadow-[0_10px_20px_-5px_rgba(105,240,174,0.4)] hover:-translate-y-0.5 text-[15px]"
+            className="mt-6 hidden lg:flex bg-[#69F0AE] hover:bg-[#52e89f] text-[#0A2616] font-black px-6 py-[16px] rounded-[2rem] items-center justify-center transition-all duration-300 w-[200px] shadow-[0_10px_20px_-5px_rgba(105,240,174,0.4)] hover:-translate-y-0.5 text-[15px]"
           >
             Add Vehicle
           </button>
@@ -625,6 +635,53 @@ export default function UserDashboard() {
               )}
           </div>
         </main>
+      </div>
+
+      {/* MOBILE BOTTOM NAV */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-50 px-6 py-4 flex justify-between items-center pb-safe">
+        <button
+          onClick={() => { setActiveTab("dashboard"); setShowMobileMore(false); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === "dashboard" ? "text-[#11153D] scale-110" : "text-[#A1A5B7]"}`}
+        >
+          <div className={`p-2 rounded-2xl ${activeTab === "dashboard" ? "bg-[#F4F5F8]" : ""}`}>
+            <LayoutDashboard className="w-6 h-6" />
+          </div>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab("vehicles"); setShowMobileMore(false); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === "vehicles" ? "text-[#11153D] scale-110" : "text-[#A1A5B7]"}`}
+        >
+          <div className={`p-2 rounded-2xl ${activeTab === "vehicles" ? "bg-[#F4F5F8]" : ""}`}>
+            <Car className="w-6 h-6" />
+          </div>
+        </button>
+
+        {/* Central Add / Action Button (replaces Add Vehicle directly) */}
+        <button
+          onClick={() => { setActiveTab("add_vehicle"); setShowMobileMore(false); }}
+          className="relative -top-6 bg-[#69F0AE] text-[#0A2616] p-4 rounded-full shadow-[0_10px_20px_-5px_rgba(105,240,174,0.5)] border-4 border-[#F8F9FD] flex items-center justify-center transform transition-transform hover:scale-105 active:scale-95"
+        >
+          <Plus className="w-7 h-7 stroke-[3]" />
+        </button>
+
+        <button
+          onClick={() => { setActiveTab("history"); setShowMobileMore(false); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === "history" ? "text-[#11153D] scale-110" : "text-[#A1A5B7]"}`}
+        >
+          <div className={`p-2 rounded-2xl ${activeTab === "history" ? "bg-[#F4F5F8]" : ""}`}>
+            <History className="w-6 h-6" />
+          </div>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab("quotas"); setShowMobileMore(false); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === "quotas" ? "text-[#11153D] scale-110" : "text-[#A1A5B7]"}`}
+        >
+          <div className={`p-2 rounded-2xl ${activeTab === "quotas" ? "bg-[#F4F5F8]" : ""}`}>
+            <Fuel className="w-6 h-6" />
+          </div>
+        </button>
       </div>
     </div>
   );
