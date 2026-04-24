@@ -12,10 +12,10 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $rules = [
-            'name'     => 'required|string',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'role'     => 'required|in:user,station,admin',
+            'name'                => 'required|string',
+            'email'               => 'required|email|unique:users,email',
+            'password'            => 'required|string|min:6',
+            'role'                => 'required|in:user,station,admin',
             'profile_picture_url' => 'nullable|string|url',
         ];
 
@@ -34,10 +34,10 @@ class AuthController extends Controller
         $request->validate($rules);
 
         $userData = [
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
+            'name'                => $request->name,
+            'email'               => $request->email,
+            'password'            => Hash::make($request->password),
+            'role'                => $request->role,
             'profile_picture_url' => $request->profile_picture_url,
         ];
 
@@ -61,11 +61,11 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('fuelease_token')->plainTextToken;
+        $token = $user->createToken('fuelease_token', ['*'], now()->addDays(7))->plainTextToken;
 
         return response()->json([
             'user'  => $user,
-            'token' => $token
+            'token' => $token,
         ], 201);
     }
 
@@ -74,7 +74,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'email'    => 'required|email',
-            'password' => 'required|string'
+            'password' => 'required|string',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -88,11 +88,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'Your account has been blocked. Please contact support.'], 403);
         }
 
-        $token = $user->createToken('fuelease_token')->plainTextToken;
+        $token = $user->createToken('fuelease_token', ['*'], now()->addDays(7))->plainTextToken;
 
         return response()->json([
             'user'  => $user,
-            'token' => $token
+            'token' => $token,
         ]);
     }
 
@@ -100,8 +100,8 @@ class AuthController extends Controller
     public function updateAccount(Request $request)
     {
         $request->validate([
-            'name'     => 'sometimes|string',
-            'password' => 'sometimes|string|min:6',
+            'name'                => 'sometimes|string',
+            'password'            => 'sometimes|string|min:6',
             'profile_picture_url' => 'nullable|string|url',
         ]);
 
