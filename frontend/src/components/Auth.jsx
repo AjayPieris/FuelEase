@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserPlus, LogIn, Upload, FileCheck, Camera, X } from "lucide-react";
+import {
+  UserPlus,
+  LogIn,
+  Upload,
+  FileCheck,
+  Camera,
+  X,
+  Fuel,
+} from "lucide-react";
 import api from "../api/axios";
 import ImageUploader from "./ImageUploader";
 
@@ -224,11 +232,18 @@ export default function Auth() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="text-[10px] font-bold text-[#1e1e4e] mb-1.5 uppercase tracking-widest flex items-center gap-1.5 opacity-80">
-                        <UserPlus className="w-3.5 h-3.5" /> Full Name
+                        {role === "station" ? (
+                          <Fuel className="w-3.5 h-3.5" />
+                        ) : (
+                          <UserPlus className="w-3.5 h-3.5" />
+                        )}{" "}
+                        {role === "station" ? "Station Name" : "Full Name"}
                       </label>
                       <input
                         type="text"
-                        placeholder="John Doe"
+                        placeholder={
+                          role === "station" ? "ABC Fuel Station" : "John Doe"
+                        }
                         required
                         className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all font-medium placeholder-slate-400"
                         value={name}
@@ -254,7 +269,11 @@ export default function Auth() {
                       </label>
                       <input
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder={
+                          role === "station"
+                            ? "station@gmail.com"
+                            : "john@example.com"
+                        }
                         required
                         className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all font-medium placeholder-slate-400"
                         value={email}
